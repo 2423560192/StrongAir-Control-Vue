@@ -30,9 +30,55 @@
 
     <el-form-item label="隐身性能" prop="stealth">
       <el-select v-model="form.stealth" placeholder="请选择隐身性能">
-        <el-option label="优秀" value="优秀"></el-option>
-        <el-option label="良好" value="良好"></el-option>
-        <el-option label="一般" value="一般"></el-option>
+        <el-option value="优秀">
+          <span style="float: left">优秀</span>
+          <span style="float: right; color: #8492a6; font-size: 13px">
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+          </span>
+        </el-option>
+        <el-option value="良好">
+          <span style="float: left">良好</span>
+          <span style="float: right; color: #8492a6; font-size: 13px">
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+          </span>
+        </el-option>
+        <el-option value="一般">
+          <span style="float: left">一般</span>
+          <span style="float: right; color: #8492a6; font-size: 13px">
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+          </span>
+        </el-option>
+        <el-option value="较差">
+          <span style="float: left">较差</span>
+          <span style="float: right; color: #8492a6; font-size: 13px">
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+          </span>
+        </el-option>
+        <el-option value="很差">
+          <span style="float: left">很差</span>
+          <span style="float: right; color: #8492a6; font-size: 13px">
+            <i class="el-icon-star-on" style="color: #F7BA2A"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+            <i class="el-icon-star-off" style="color: #C6D1DE"></i>
+          </span>
+        </el-option>
       </el-select>
     </el-form-item>
 
@@ -191,10 +237,11 @@ export default {
   methods: {
     getStealthText(level) {
       if (!level) return '一般'
-      if (level >= 8) return '优秀'
-      if (level >= 6) return '良好'
-      if (level >= 4) return '一般'
-      return '较差'
+      if (level >= 9) return '优秀'  // 5星
+      if (level >= 7) return '良好'  // 4星
+      if (level >= 5) return '一般'  // 3星
+      if (level >= 3) return '较差'  // 2星
+      return '很差'                  // 1星
     },
     async submitForm() {
       try {
@@ -230,12 +277,13 @@ export default {
     },
     getStealthLevel(text) {
       const levels = {
-        '优秀': 9,
-        '良好': 7,
-        '一般': 5,
-        '较差': 3
+        '优秀': 10,  // 5星
+        '良好': 8,   // 4星
+        '一般': 6,   // 3星
+        '较差': 3,   // 2星
+        '很差': 1    // 1星
       }
-      return levels[text] || 5
+      return levels[text] || 6
     }
   }
 }

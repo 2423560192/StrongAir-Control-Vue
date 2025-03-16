@@ -105,16 +105,15 @@
           </template>
         </el-table-column>
         <el-table-column
-          prop="stealthLevel"
           label="隐身性能"
-          width="110"
+          width="140"
           align="center">
           <template slot-scope="scope">
             <el-rate
-              :value="scope.row.stealthLevel / 2"
+              :value="getStealthStars(scope.row.stealthLevel)"
               disabled
-              show-score
-              text-color="#ff9900">
+              :max="5"
+              :colors="['#99A9BF', '#F7BA2A', '#FF9900']">
             </el-rate>
           </template>
         </el-table-column>
@@ -751,6 +750,14 @@ export default {
         clearInterval(this.statusUpdateTimer)
         this.statusUpdateTimer = null
       }
+    },
+    getStealthStars(level) {
+      if (!level) return 3  // 默认3星
+      if (level >= 9) return 5  // 优秀 5星
+      if (level >= 7) return 4  // 良好 4星
+      if (level >= 5) return 3  // 一般 3星
+      if (level >= 3) return 2  // 较差 2星
+      return 1                  // 很差 1星
     }
   }
 }
