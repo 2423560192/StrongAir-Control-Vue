@@ -1,0 +1,170 @@
+<template>
+  <el-form 
+    ref="form"
+    :model="form"
+    :rules="rules"
+    label-width="120px">
+    <el-form-item label="飞机名称" prop="name">
+      <el-input v-model="form.name"></el-input>
+    </el-form-item>
+    
+    <el-form-item label="飞机类型" prop="type">
+      <el-select v-model="form.type" placeholder="请选择飞机类型">
+        <el-option label="战斗机" value="战斗机"></el-option>
+        <el-option label="运输机" value="运输机"></el-option>
+        <el-option label="侦查机" value="侦查机"></el-option>
+      </el-select>
+    </el-form-item>
+
+    <el-form-item label="飞机数量" prop="quantity">
+      <el-input-number v-model="form.quantity" :min="1"></el-input-number>
+    </el-form-item>
+
+    <el-form-item label="飞行高度(米)" prop="altitude">
+      <el-input-number v-model="form.altitude" :min="0"></el-input-number>
+    </el-form-item>
+
+    <el-form-item label="飞行速度(马赫)" prop="speed">
+      <el-input-number v-model="form.speed" :min="0" :precision="1"></el-input-number>
+    </el-form-item>
+
+    <el-form-item label="隐身性能" prop="stealth">
+      <el-select v-model="form.stealth" placeholder="请选择隐身性能">
+        <el-option label="优秀" value="优秀"></el-option>
+        <el-option label="良好" value="良好"></el-option>
+        <el-option label="一般" value="一般"></el-option>
+      </el-select>
+    </el-form-item>
+
+    <el-form-item label="雷达型号" prop="radarModel">
+      <el-input v-model="form.radarModel"></el-input>
+    </el-form-item>
+
+    <!-- 战斗机特有字段 -->
+    <template v-if="form.type === '战斗机'">
+      <el-form-item label="载弹数量" prop="payload">
+        <el-input-number v-model="form.payload" :min="0"></el-input-number>
+      </el-form-item>
+      
+      <el-form-item label="武器类型" prop="weaponTypes">
+        <el-input v-model="form.weaponTypes" placeholder="如：空空导弹,空地导弹"></el-input>
+      </el-form-item>
+      
+      <el-form-item label="作战半径(公里)" prop="combatRange">
+        <el-input-number v-model="form.combatRange" :min="0"></el-input-number>
+      </el-form-item>
+    </template>
+    
+    <!-- 运输机特有字段 -->
+    <template v-if="form.type === '运输机'">
+      <el-form-item label="载货量(吨)" prop="cargoCapacity">
+        <el-input-number v-model="form.cargoCapacity" :min="0"></el-input-number>
+      </el-form-item>
+      
+      <el-form-item label="货舱容积(立方米)" prop="cargoSpace">
+        <el-input-number v-model="form.cargoSpace" :min="0"></el-input-number>
+      </el-form-item>
+      
+      <el-form-item label="最大航程(公里)" prop="maxRange">
+        <el-input-number v-model="form.maxRange" :min="0"></el-input-number>
+      </el-form-item>
+    </template>
+    
+    <!-- 侦查机特有字段 -->
+    <template v-if="form.type === '侦查机'">
+      <el-form-item label="侦查范围(公里)" prop="reconRange">
+        <el-input-number v-model="form.reconRange" :min="0"></el-input-number>
+      </el-form-item>
+      
+      <el-form-item label="传感器类型" prop="sensorTypes">
+        <el-input v-model="form.sensorTypes" placeholder="如：红外,雷达,光电"></el-input>
+      </el-form-item>
+      
+      <el-form-item label="续航时间(小时)" prop="endurance">
+        <el-input-number v-model="form.endurance" :min="0"></el-input-number>
+      </el-form-item>
+    </template>
+
+    <el-form-item>
+      <el-button type="primary" @click="submitForm">提交</el-button>
+      <el-button @click="$emit('cancel')">取消</el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+import { createAircraft, updateAircraft } from '@/api/aircraft'
+
+export default {
+  name: 'AircraftForm',
+  props: {
+    aircraft: {
+      type: Object,
+      default: null
+    }
+  },
+  data() {
+    return {
+      form: {
+        name: '',
+        type: '',
+        quantity: 1,
+        altitude: 0,
+        speed: 0,
+        stealth: '',
+        radarModel: '',
+        // 战斗机特有
+        payload: 0,
+        weaponTypes: '',
+        combatRange: 0,
+        // 运输机特有
+        cargoCapacity: 0,
+        cargoSpace: 0,
+        maxRange: 0,
+        // 侦查机特有
+        reconRange: 0,
+        sensorTypes: '',
+        endurance: 0
+      },
+      rules: {
+        name: [
+          { required: true, message: '请输入飞机名称', trigger: 'blur' }
+        ],
+        type: [
+          { required: true, message: '请选择飞机类型', trigger: 'change' }
+        ],
+        quantity: [
+          { required: true, message: '请输入飞机数量', trigger: 'blur' }
+        ],
+        altitude: [
+          { required: true, message: '请输入飞行高度', trigger: 'blur' }
+        ],
+        speed: [
+          { required: true, message: '请输入飞行速度', trigger: 'blur' }
+        ],
+        stealth: [
+          { required: true, message: '请选择隐身性能', trigger: 'change' }
+        ],
+        radarModel: [
+          { required: true, message: '请输入雷达型号', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  created() {
+    if (this.aircraft) {
+      this.form = { ...this.aircraft }
+    }
+  },
+  methods: {
+    async submitForm() {
+      try {
+        await this.$refs.form.validate()
+        this.$emit('submit', this.form)
+      } catch (error) {
+        throw error
+      }
+    }
+  }
+}
+</script> 
