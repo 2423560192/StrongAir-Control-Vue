@@ -73,4 +73,12 @@ export function getAircraftStatus(id) {
     url: `/unified-aircraft/${id}/status`,
     method: 'get'
   })
+}
+
+// 获取飞机统计数据
+export function getAircraftStats() {
+  return request({
+    url: '/unified-aircraft/stats',
+    method: 'get'
+  })
 } 

@@ -834,6 +834,9 @@ export default {
       } else {
         done()
       }
+    },
+    goToStats() {
+      this.$router.push({ name: 'AircraftStats' })
     }
   }
 }

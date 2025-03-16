@@ -27,13 +27,13 @@
       <el-container>
         <el-aside width="220px">
           <el-menu
-            :router="true"
-            default-active="/aircraft"
+            :default-active="activeMenu"
             class="el-menu-vertical"
             background-color="#001529"
-            text-color="#fff"
-            :unique-opened="true"
-            active-text-color="#409EFF">
+            text-color="#a3a6ad"
+            active-text-color="#409EFF"
+            :collapse="isCollapse"
+            :router="true">
             <div class="menu-header">系统导航</div>
             <el-submenu index="1">
               <template slot="title">
@@ -53,6 +53,16 @@
     </el-container>
   </div>
 </template>
+
+<script>
+export default {
+  computed: {
+    activeMenu() {
+      return this.$route.path
+    }
+  }
+}
+</script>
 
 <style lang="scss">
 @keyframes radar-beam {
