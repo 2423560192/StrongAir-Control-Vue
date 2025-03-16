@@ -29,18 +29,32 @@
               v-model="searchForm.name"
               placeholder="请输入飞机名称"
               prefix-icon="el-icon-search"
-              clearable>
+              clearable
+              @keyup.enter.native="handleSearch">
             </el-input>
           </el-form-item>
           <el-form-item label="飞机类型">
-            <el-select v-model="searchForm.type" placeholder="请选择类型" clearable>
-              <el-option label="战斗机" value="战斗机"></el-option>
+            <el-select 
+              v-model="searchForm.type" 
+              placeholder="请选择飞机类型"
+              clearable>
               <el-option label="运输机" value="运输机"></el-option>
-              <el-option label="侦查机" value="侦查机"></el-option>
+              <el-option label="战斗机" value="战斗机"></el-option>
+              <el-option label="侦察机" value="侦察机"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="任务状态">
+            <el-select 
+              v-model="searchForm.status" 
+              placeholder="请选择任务状态"
+              clearable>
+              <el-option label="待命中" value="待命中"></el-option>
+              <el-option label="进行中" value="进行中"></el-option>
+              <el-option label="已完成" value="已完成"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
+            <el-button type="primary" @click="handleSearch">搜索</el-button>
             <el-button @click="resetSearch">重置</el-button>
           </el-form-item>
         </el-form>
@@ -51,7 +65,7 @@
     <el-card class="table-card">
       <el-table
         v-loading="loading"
-        :data="aircraftList"
+        :data="paginatedAircraftList"
         stripe
         class="aircraft-table">
         <el-table-column
@@ -439,7 +453,8 @@ export default {
       aircraftList: [],
       searchForm: {
         name: '',
-        type: ''
+        type: '',
+        status: ''
       },
       currentPage: 1,
       pageSize: 10,
@@ -464,6 +479,36 @@ export default {
       aircraftDetail: {},
       statusUpdateTimer: null,
       editDialogVisible: false
+    }
+  },
+  computed: {
+    filteredAircraftList() {
+      return this.aircraftList.filter(item => {
+        // 名称匹配
+        const nameMatch = !this.searchForm.name || 
+          item.name.toLowerCase().includes(this.searchForm.name.toLowerCase())
+        
+        // 类型匹配
+        const typeMatch = !this.searchForm.type || 
+          item.type === this.searchForm.type ||
+          (this.searchForm.type === 'transport' && item.type === '运输机') ||
+          (this.searchForm.type === 'fighter' && item.type === '战斗机') ||
+          (this.searchForm.type === 'recon' && item.type === '侦察机')
+        
+        // 状态匹配
+        const statusMatch = !this.searchForm.status || 
+          this.formatMissionStatus(item.missionStatus) === this.searchForm.status
+        
+        return nameMatch && typeMatch && statusMatch
+      })
+    },
+    paginatedAircraftList() {
+      const start = (this.currentPage - 1) * this.pageSize
+      const end = start + this.pageSize
+      return this.filteredAircraftList.slice(start, end)
+    },
+    total() {
+      return this.filteredAircraftList.length
     }
   },
   created() {
@@ -523,22 +568,21 @@ export default {
     },
     handleSearch() {
       this.currentPage = 1
-      this.fetchData()
     },
     resetSearch() {
       this.searchForm = {
         name: '',
-        type: ''
+        type: '',
+        status: ''
       }
-      this.handleSearch()
+      this.currentPage = 1
     },
     handleSizeChange(val) {
       this.pageSize = val
-      this.fetchData()
+      this.currentPage = 1
     },
     handleCurrentChange(val) {
       this.currentPage = val
-      this.fetchData()
     },
     handleAdd() {
       this.dialogType = 'add'
