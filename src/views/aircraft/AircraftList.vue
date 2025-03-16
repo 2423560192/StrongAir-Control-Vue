@@ -147,7 +147,7 @@
         </el-table-column>
         <el-table-column
           label="操作"
-          width="280"
+          width="350"
           align="center">
           <template slot-scope="scope">
             <el-button
@@ -155,6 +155,12 @@
               type="info"
               @click="handleViewDetail(scope.row)">
               查看详细
+            </el-button>
+            <el-button
+              size="mini"
+              type="warning"
+              @click="handleEdit(scope.row)">
+              修改
             </el-button>
             <el-button
               size="mini"
@@ -195,12 +201,13 @@
 
     <!-- 添加飞机对话框 -->
     <el-dialog
-      title="添加飞机"
+      :title="dialogType === 'add' ? '添加飞机' : '修改飞机'"
       :visible.sync="dialogVisible"
       width="50%"
       :before-close="handleClose">
       <aircraft-form
         ref="aircraftForm"
+        :aircraft="currentAircraft"
         @submit="handleSubmit"
         @cancel="dialogVisible = false">
       </aircraft-form>
@@ -355,7 +362,7 @@
 </template>
 
 <script>
-import { getAircraftList, getAircraft, deleteAircraft, createAircraft, assignMission, getMissions, recallMission } from '@/api/aircraft'
+import { getAircraftList, getAircraft, deleteAircraft, createAircraft, updateAircraft, assignMission, getMissions, recallMission } from '@/api/aircraft'
 import AircraftForm from '@/components/aircraft/AircraftForm.vue'
 
 export default {
@@ -376,6 +383,7 @@ export default {
       pageSize: 10,
       total: 0,
       dialogVisible: false,
+      dialogType: 'add',
       assignDialogVisible: false,
       assignForm: {
         name: '',
@@ -460,24 +468,53 @@ export default {
       this.fetchData()
     },
     handleAdd() {
+      this.dialogType = 'add'
+      this.currentAircraft = null
       this.dialogVisible = true
     },
     handleClose(done) {
-      this.$confirm('确认关闭？')
-        .then(_ => {
-          done()
-        })
-        .catch(_ => {})
+      if (this.$refs.aircraftForm && this.$refs.aircraftForm.isFormChanged) {
+        this.$confirm('表单已修改，确认关闭？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          customClass: 'dark-message-box'
+        }).then(() => {
+          done();
+        }).catch(() => {
+          // 取消关闭
+        });
+      } else {
+        // 如果表单未修改，直接关闭
+        done();
+      }
     },
     async handleSubmit(formData) {
       try {
-        await createAircraft(formData)
-        this.$message.success('添加成功')
+        if (this.dialogType === 'add') {
+          await createAircraft(formData)
+        } else {
+          await updateAircraft(this.currentAircraft.id, formData)
+        }
+        this.$refs.aircraftForm.originalForm = null; // 重置表单状态，避免触发修改确认
         this.dialogVisible = false
         this.fetchData()
+        this.$notify({
+          title: '成功',
+          message: this.dialogType === 'add' ? '添加成功' : '修改成功',
+          type: 'success',
+          position: 'top-right',
+          duration: 2000,
+          customClass: 'success-notify'
+        })
       } catch (error) {
         if (error !== 'cancel') {
-          this.$message.error(error.message || '添加失败')
+          this.$notify.error({
+            title: '错误',
+            message: error.message || (this.dialogType === 'add' ? '添加失败' : '修改失败'),
+            position: 'top-right',
+            duration: 4000
+          })
         }
       }
     },
@@ -574,6 +611,30 @@ export default {
         this.aircraftDetail = response.data || {}
       } catch (error) {
         this.$message.error('获取飞机详情失败')
+      } finally {
+        this.detailLoading = false
+      }
+    },
+    async handleEdit(row) {
+      this.dialogType = 'edit'
+      this.detailLoading = true
+      
+      try {
+        const response = await getAircraft(row.id)
+        if (response.data) {
+          console.log('Got aircraft data:', response.data); // 调试用
+          this.currentAircraft = response.data
+          this.dialogVisible = true
+        } else {
+          throw new Error('未获取到飞机数据')
+        }
+      } catch (error) {
+        this.$notify.error({
+          title: '错误',
+          message: error.message || '获取飞机信息失败',
+          position: 'top-right',
+          duration: 4000
+        })
       } finally {
         this.detailLoading = false
       }
@@ -727,5 +788,36 @@ export default {
     border-left: 3px solid #409EFF;
     padding-left: 10px;
   }
+}
+
+/* 自定义确认对话框样式 */
+.el-message-box {
+  background-color: #0a192f;
+  border: 1px solid #64ffda;
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.3);
+}
+
+.el-message-box__title {
+  color: #ccd6f6;
+}
+
+.el-message-box__content {
+  color: #8892b0;
+}
+
+.el-message-box__btns button {
+  background: transparent;
+  border-color: #64ffda;
+  color: #64ffda;
+}
+
+.el-message-box__btns button:hover {
+  background-color: rgba(100, 255, 218, 0.1);
+  color: #fff;
+}
+
+.el-message-box__btns button.el-button--primary {
+  background-color: rgba(100, 255, 218, 0.2);
 }
 </style> 

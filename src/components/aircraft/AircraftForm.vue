@@ -126,6 +126,7 @@ export default {
         sensorTypes: '',
         endurance: 0
       },
+      originalForm: null, // 用于存储原始表单数据
       rules: {
         name: [
           { required: true, message: '请输入飞机名称', trigger: 'blur' }
@@ -153,17 +154,88 @@ export default {
   },
   created() {
     if (this.aircraft) {
-      this.form = { ...this.aircraft }
+      console.log('Editing aircraft:', this.aircraft); // 调试用
+      this.form = {
+        name: this.aircraft.name,
+        type: this.aircraft.type,
+        quantity: this.aircraft.quantity,
+        altitude: Number(this.aircraft.flightAltitude) || 0,
+        speed: Number(this.aircraft.flightSpeed) || 0,
+        stealth: this.getStealthText(this.aircraft.stealthLevel),
+        radarModel: this.aircraft.radarModel,
+        // 战斗机特有
+        payload: Number(this.aircraft.weaponCapacity) || 0,
+        weaponTypes: this.aircraft.weaponTypes || '',
+        combatRange: Number(this.aircraft.combatRange) || 0,
+        // 运输机特有
+        cargoCapacity: Number(this.aircraft.cargoCapacity) || 0,
+        cargoSpace: Number(this.aircraft.cargoSpace) || 0,
+        maxRange: Number(this.aircraft.maxRange) || 0,
+        // 侦查机特有
+        reconRange: Number(this.aircraft.reconRange) || 0,
+        sensorTypes: this.aircraft.sensorTypes || '',
+        endurance: Number(this.aircraft.endurance) || 0
+      }
+      // 保存原始表单数据的副本
+      this.originalForm = JSON.stringify(this.form);
+    } else {
+      this.originalForm = JSON.stringify(this.form);
+    }
+  },
+  computed: {
+    // 检查表单是否被修改
+    isFormChanged() {
+      return this.originalForm !== JSON.stringify(this.form);
     }
   },
   methods: {
+    getStealthText(level) {
+      if (!level) return '一般'
+      if (level >= 8) return '优秀'
+      if (level >= 6) return '良好'
+      if (level >= 4) return '一般'
+      return '较差'
+    },
     async submitForm() {
       try {
         await this.$refs.form.validate()
-        this.$emit('submit', this.form)
+        const formData = {
+          name: this.form.name,
+          type: this.form.type,
+          quantity: Number(this.form.quantity),
+          flightAltitude: Number(this.form.altitude),
+          flightSpeed: Number(this.form.speed),
+          stealthLevel: this.getStealthLevel(this.form.stealth),
+          radarModel: this.form.radarModel
+        }
+        
+        if (this.form.type === '战斗机') {
+          formData.weaponCapacity = Number(this.form.payload)
+          formData.weaponTypes = this.form.weaponTypes
+          formData.combatRange = Number(this.form.combatRange)
+        } else if (this.form.type === '运输机') {
+          formData.cargoCapacity = Number(this.form.cargoCapacity)
+          formData.cargoSpace = Number(this.form.cargoSpace)
+          formData.maxRange = Number(this.form.maxRange)
+        } else if (this.form.type === '侦查机') {
+          formData.reconRange = Number(this.form.reconRange)
+          formData.sensorTypes = this.form.sensorTypes
+          formData.endurance = Number(this.form.endurance)
+        }
+        
+        this.$emit('submit', formData)
       } catch (error) {
         throw error
       }
+    },
+    getStealthLevel(text) {
+      const levels = {
+        '优秀': 9,
+        '良好': 7,
+        '一般': 5,
+        '较差': 3
+      }
+      return levels[text] || 5
     }
   }
 }

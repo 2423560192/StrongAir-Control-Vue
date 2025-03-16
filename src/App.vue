@@ -265,4 +265,114 @@ html, body {
     box-shadow: 0 0 15px var(--border-glow);
   }
 }
+
+/* 对话框样式 */
+.el-dialog {
+  background-color: var(--primary-bg);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  box-shadow: 0 0 20px var(--border-glow);
+  
+  .el-dialog__header {
+    background-color: rgba(23, 42, 69, 0.8);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--accent-color);
+    
+    .el-dialog__title {
+      color: var(--accent-color);
+      font-weight: 500;
+    }
+    
+    .el-dialog__headerbtn .el-dialog__close {
+      color: var(--text-secondary);
+      
+      &:hover {
+        color: var(--accent-color);
+      }
+    }
+  }
+  
+  .el-dialog__body {
+    color: var(--text-primary);
+    padding: 20px;
+  }
+  
+  .el-dialog__footer {
+    border-top: 1px solid rgba(100, 255, 218, 0.2);
+    padding: 15px 20px;
+  }
+}
+
+/* 表单样式 */
+.el-form-item__label {
+  color: var(--text-primary);
+}
+
+.el-input__inner,
+.el-textarea__inner,
+.el-input-number__decrease,
+.el-input-number__increase,
+.el-select .el-input .el-select__caret,
+.el-select-dropdown {
+  background-color: rgba(23, 42, 69, 0.8);
+  border-color: rgba(100, 255, 218, 0.3);
+  color: var(--text-primary);
+}
+
+.el-input__inner:focus,
+.el-textarea__inner:focus {
+  border-color: var(--accent-color);
+}
+
+.el-select-dropdown {
+  background-color: var(--primary-bg);
+  border: 1px solid var(--accent-color);
+  box-shadow: 0 0 10px var(--border-glow);
+}
+
+.el-select-dropdown__item {
+  color: var(--text-secondary);
+  
+  &.hover, &:hover {
+    background-color: rgba(100, 255, 218, 0.1);
+    color: var(--accent-color);
+  }
+  
+  &.selected {
+    color: var(--accent-color);
+    font-weight: bold;
+    background-color: rgba(100, 255, 218, 0.1);
+  }
+}
+
+/* 通知样式 */
+.el-notification {
+  background-color: var(--primary-bg);
+  border: 1px solid var(--accent-color);
+  box-shadow: 0 0 15px var(--border-glow);
+  
+  .el-notification__title {
+    color: var(--text-primary);
+  }
+  
+  .el-notification__content {
+    color: var(--text-secondary);
+  }
+  
+  &.success-notify {
+    border-color: #67c23a;
+    
+    .el-notification__title {
+      color: #67c23a;
+    }
+  }
+  
+  &.el-notification--error {
+    border-color: #f56c6c;
+    
+    .el-notification__title {
+      color: #f56c6c;
+    }
+  }
+}
 </style> 
