@@ -405,6 +405,21 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 编辑对话框 -->
+    <el-dialog
+      title="编辑飞机"
+      :visible.sync="editDialogVisible"
+      width="60%"
+      :close-on-click-modal="false"
+      :before-close="handleDialogClose">
+      <aircraft-form
+        v-if="editDialogVisible"
+        :aircraft="currentAircraft"
+        @submit="handleEditSubmit"
+        @cancel="editDialogVisible = false">
+      </aircraft-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -447,7 +462,8 @@ export default {
       detailDialogVisible: false,
       detailLoading: false,
       aircraftDetail: {},
-      statusUpdateTimer: null
+      statusUpdateTimer: null,
+      editDialogVisible: false
     }
   },
   created() {
@@ -684,29 +700,34 @@ export default {
         this.detailLoading = false
       }
     },
-    async handleEdit(row) {
+    handleEdit(row) {
       this.dialogType = 'edit'
-      this.detailLoading = true
-      
-      try {
-        const response = await getAircraft(row.id)
-        if (response.data) {
-          console.log('Got aircraft data:', response.data); // 调试用
-          this.currentAircraft = response.data
-          this.dialogVisible = true
-        } else {
-          throw new Error('未获取到飞机数据')
-        }
-      } catch (error) {
-        this.$notify.error({
-          title: '错误',
-          message: error.message || '获取飞机信息失败',
-          position: 'top-right',
-          duration: 4000
+      this.currentAircraft = { ...row }  // 创建一个副本以避免直接修改表格数据
+      this.editDialogVisible = true
+    },
+    handleEditSubmit(formData) {
+      // 添加飞机ID到表单数据
+      formData.id = this.currentAircraft.id
+      updateAircraft(this.currentAircraft.id, formData)
+        .then(() => {
+          this.$notify({
+            title: '成功',
+            message: '修改成功',
+            type: 'success',
+            position: 'top-right',
+            duration: 2000
+          })
+          this.editDialogVisible = false
+          this.fetchData()  // 刷新列表数据
         })
-      } finally {
-        this.detailLoading = false
-      }
+        .catch(() => {
+          this.$notify.error({
+            title: '错误',
+            message: '修改失败',
+            position: 'top-right',
+            duration: 4000
+          })
+        })
     },
     formatDateTime(dateStr) {
       if (!dateStr) return '未设置'
@@ -758,6 +779,17 @@ export default {
       if (level >= 5) return 3  // 一般 3星
       if (level >= 3) return 2  // 较差 2星
       return 1                  // 很差 1星
+    },
+    handleDialogClose(done) {
+      if (this.$refs.form && this.$refs.form.isFormChanged) {
+        this.$confirm('确认关闭？未保存的修改将会丢失')
+          .then(() => {
+            done()
+          })
+          .catch(() => {})
+      } else {
+        done()
+      }
     }
   }
 }
