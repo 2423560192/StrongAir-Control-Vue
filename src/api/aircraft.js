@@ -65,4 +65,12 @@ export function recallMission(missionId) {
     url: `/unified-aircraft/mission/${missionId}/recall`,
     method: 'post'
   })
+}
+
+// 获取飞机任务状态
+export function getAircraftStatus(id) {
+  return request({
+    url: `/unified-aircraft/${id}/status`,
+    method: 'get'
+  })
 } 
